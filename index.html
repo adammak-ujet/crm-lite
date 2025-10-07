@@ -87,7 +87,7 @@
 
     <script>
         // --- CONFIGURATION ---
-        const functionUrl = 'https://getcustomerdata-243410521050.us-central1.run.app'; 
+        const functionUrl = 'YOUR_GCP_FUNCTION_URL_HERE'; 
 
         // --- DOM ELEMENTS ---
         const phoneInput = document.getElementById('phoneInput');
@@ -105,13 +105,37 @@
             }
         });
 
+        // --- NEW: Phone Number Formatting Function ---
+        function formatPhoneNumber(inputString) {
+            // First, get only the digits from the user's input.
+            let digits = inputString.replace(/\D/g, '');
+
+            // Handle the leading '1' for North American numbers if present
+            if (digits.length === 11 && digits.startsWith('1')) {
+                digits = digits.substring(1);
+            }
+
+            // If we have a 10-digit number, format it as (XXX) XXX-XXXX
+            if (digits.length === 10) {
+                return digits.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+            }
+
+            // As a fallback, return the original input, trimmed of whitespace.
+            return inputString.trim();
+        }
+        // --- END NEW ---
+
         // --- DATA FETCHING ---
         async function handleFetchData() {
-            const phoneNumber = phoneInput.value.trim();
-            if (!phoneNumber) {
+            const rawPhoneNumber = phoneInput.value;
+            if (!rawPhoneNumber) {
                 showError('Please enter a Phone Number.');
                 return;
             }
+
+            // --- UPDATED: Use the new formatting function ---
+            const formattedPhoneNumber = formatPhoneNumber(rawPhoneNumber);
+            // --- END UPDATED ---
 
             if (functionUrl === 'YOUR_GCP_FUNCTION_URL_HERE' || functionUrl === '') {
                 showError('Please configure the functionUrl in the HTML file.');
@@ -124,7 +148,8 @@
             loadingDiv.style.display = 'block';
 
             try {
-                const response = await fetch(`${functionUrl}?phoneNumber=${encodeURIComponent(phoneNumber)}`);
+                // Use the formatted phone number in the request
+                const response = await fetch(`${functionUrl}?phoneNumber=${encodeURIComponent(formattedPhoneNumber)}`);
                 
                 if (!response.ok) {
                     const errorText = await response.text();
@@ -203,3 +228,4 @@
     </script>
 </body>
 </html>
+
