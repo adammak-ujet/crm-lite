@@ -87,7 +87,7 @@
 
     <script>
         // --- CONFIGURATION ---
-        const functionUrl = 'https://getcustomerdata-243410521050.us-central1.run.app'; 
+        const functionUrl = 'YOUR_GCP_FUNCTION_URL_HERE'; 
 
         // --- DOM ELEMENTS ---
         const phoneInput = document.getElementById('phoneInput');
@@ -105,7 +105,20 @@
             }
         });
 
-        // --- NEW: Phone Number Formatting Function ---
+        // --- NEW: AUTO-SEARCH ON PAGE LOAD ---
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const phoneNumberFromUrl = params.get('phoneNumber');
+
+            if (phoneNumberFromUrl) {
+                // If a phone number is found in the URL, populate the input and search automatically
+                phoneInput.value = phoneNumberFromUrl;
+                handleFetchData();
+            }
+        });
+        // --- END NEW ---
+
+        // --- Phone Number Formatting Function ---
         function formatPhoneNumber(inputString) {
             // First, get only the digits from the user's input.
             let digits = inputString.replace(/\D/g, '');
@@ -123,7 +136,6 @@
             // As a fallback, return the original input, trimmed of whitespace.
             return inputString.trim();
         }
-        // --- END NEW ---
 
         // --- DATA FETCHING ---
         async function handleFetchData() {
@@ -133,10 +145,8 @@
                 return;
             }
 
-            // --- UPDATED: Use the new formatting function ---
             const formattedPhoneNumber = formatPhoneNumber(rawPhoneNumber);
-            // --- END UPDATED ---
-
+            
             if (functionUrl === 'YOUR_GCP_FUNCTION_URL_HERE' || functionUrl === '') {
                 showError('Please configure the functionUrl in the HTML file.');
                 return;
